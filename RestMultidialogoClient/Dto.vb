@@ -481,11 +481,13 @@ Namespace RestMultidialogoClient
             Public countryCode As String
             Public billingMode As String
             Public track As CuTrack
+            Public type as String
 
             Public Sub New(ByVal fileContent As String)
                 Me.label = "Esempio"
                 Me.countryCode = "it"
-                Me.billingMode = "SPLIT"
+                Me.billingMode = "CLAIM"
+                Me.type = "CU"
                 Me.track = New CuTrack(fileContent)
             End Sub
         End Class
