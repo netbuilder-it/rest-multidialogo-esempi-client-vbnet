@@ -3,14 +3,14 @@
 Namespace RestMultidialogoClient
     Module Domain
         Public Class Email
-            Public ReadOnly DisplayAddress As String
-            Public ReadOnly NotificationAddress As String
-            Public ReadOnly CertifiedAddress As String
+            Public ReadOnly displayAddress As String
+            Public ReadOnly notificationAddress As String
+            Public ReadOnly certifiedAddress As String
 
             Public Sub New(ByVal displayAddress As String, ByVal notificationAddress As String, ByVal certifiedAddress As String)
-                Me.DisplayAddress = displayAddress
-                Me.NotificationAddress = notificationAddress
-                Me.CertifiedAddress = certifiedAddress
+                Me.displayAddress = displayAddress
+                Me.notificationAddress = notificationAddress
+                Me.certifiedAddress = certifiedAddress
             End Sub
         End Class
 
