@@ -340,5 +340,67 @@ Namespace RestMultidialogoClient
                 Me.data = data
             End Sub
         End Class
+
+        Public Class SmsSender
+            Public aliasUuid As String
+            Public phoneNumberUuid As String
+            Public notificationAddress As String
+
+
+            Public Sub New(aliasUuid As String, phoneNumberUuid As String, notificationAddress As String)
+                Me.aliasUuid = aliasUuid
+                Me.phoneNumberUuid = phoneNumberUuid
+                Me.notificationAddress = notificationAddress
+            End Sub
+
+            Public Shared Function CreateWithAlias(ByVal aliasUuid As String, ByVal notificationEmailAddress As String) As SmsSender
+                Return New SmsSender(aliasUuid, Nothing, notificationEmailAddress)
+            End Function
+
+            Public Shared Function CreateWithPhoneNumber(ByVal phoneNumberUuid As String, ByVal notificationEmailAddress As String) As SmsSender
+                Return New SmsSender(Nothing, phoneNumberUuid, notificationEmailAddress)
+            End Function
+        End Class
+
+        Public Class SmsQueueOptions
+            Public scheduleAt As DateTime? = Nothing
+            Public billing As SmsQueueBillingOptions
+
+            Public Sub New(ByRef scheduleAt As DateTime?, billingOptions As SmsQueueBillingOptions)
+                If (scheduleAt.HasValue) Then
+                    Me.scheduleAt = scheduleAt
+                End If
+                Me.billing = billingOptions
+            End Sub
+
+            Public Shared Function Create(ByRef scheduleAt As DateTime?, invoiceTag As String) As SmsQueueOptions
+                Dim billingOptions As SmsQueueBillingOptions = Nothing
+                If (Not String.IsNullOrWhiteSpace(invoiceTag)) Then
+                    billingOptions = New SmsQueueBillingOptions(invoiceTag)
+                End If
+
+                Return New SmsQueueOptions(scheduleAt, billingOptions)
+            End Function
+        End Class
+
+        Public Class SmsQueueBillingOptions
+            Public invoiceTag As String
+
+            Public Sub New(invoiceTag As String)
+                Me.invoiceTag = invoiceTag
+            End Sub
+        End Class
+
+        Public Class SmsRecipient
+            Public phoneNumber As String
+            Public keywords As List(Of Keyword)
+            Public customData As List(Of CustomDataElement)
+
+            Public Sub New(phoneNumber As String, keywords As List(Of Keyword), customData As List(Of CustomDataElement))
+                Me.phoneNumber = phoneNumber
+                Me.customData = customData
+                Me.keywords = keywords
+            End Sub
+        End Class
     End Module    
 End Namespace

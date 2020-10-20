@@ -42,6 +42,8 @@ Namespace RestMultidialogoClient
                         Scenario_7().Wait()
                     Case 8
                         Scenario_8().Wait()
+                    Case 9
+                        Scenario_9().Wait()
                     Case Else
                         Console.WriteLine("Scelta errata")
                 End Select
@@ -70,6 +72,7 @@ Namespace RestMultidialogoClient
             Console.WriteLine(" 6 - Elenco utenti collegati")
             Console.WriteLine(" 7 - Invio Certificazione Unica 2020")
             Console.WriteLine(" 8 - Legge tipo di affrancatura impostata in preferenze")
+            Console.WriteLine(" 9 - Invio messaggio SMS a due destinari")
             Console.WriteLine(" 0 - Fine")
             Console.WriteLine("Scegli lo scenario: ")
         End Sub
@@ -89,13 +92,13 @@ Namespace RestMultidialogoClient
                     globale1
                 })
                 Dim recipient1 As Recipient = Recipient.CreateRecipient("Via Emilia Ovest 129/2", "43126", "Parma", "PR", "it", "pt", "RACCOMANDATA1", "person", "Winton", "Marsalis", "Multidialogo Srl", "esempio1@catchall.netbuilder.it", Nothing, New List(Of String) From {
-                    personale1.Id
+                    personale1.id
                 }, "sendposta", Nothing, Nothing)
                 Dim recipient2 As Recipient = Recipient.CreateRecipient("Via Zarotto 63", "43123", "Collecchio", "PR", "it", "pt", "RACCOMANDATA1AR", "person", "Clara", "Schumann", "ASA Srl", "esempio2@catchall.netbuilder.it", Nothing, New List(Of String) From {
-                    personale2.Id
+                    personale2.id
                 }, "sendposta", Nothing, Nothing)
                 Dim recipient3 As Recipient = Recipient.CreateRecipient("Via Zarotto 63", "43123", "Collecchio", "PR", "it", "pt", "PRIORITARIA1", "person", "Amilcare", "Ponchielli", "AM Spa", "esempio3@catchall.netbuilder.it", "info@pec.testtest.it", New List(Of String) From {
-                    personale3.Id
+                    personale3.id
                 }, "sendposta", Nothing, Nothing)
                 Dim postQueueDto As PostQueueDto = PostQueue.CreatePostQueue(Sender.CreateSender(), attachments, New List(Of Recipient) From {
                     recipient1,
@@ -123,13 +126,13 @@ Namespace RestMultidialogoClient
                     globale1
                 })
                 Dim recipient1 As Recipient = Recipient.CreateRecipient("Via Emilia Ovest 129/2", "43126", "Parma", "PR", "it", "pt", "RACCOMANDATA1", "person", "Winton", "Marsalis", "Multidialogo Srl", "esempio1@catchall.netbuilder.it", Nothing, New List(Of String) From {
-                    personale1.Id
+                    personale1.id
                 }, "sendposta", Nothing, Nothing)
                 Dim recipient2 As Recipient = Recipient.CreateRecipient("Via Zarotto 63", "43123", "Collecchio", "PR", "it", "pt", "RACCOMANDATA1AR", "person", "Clara", "Schumann", "ASA Srl", Constants.MULTICERTA_ENABLED_ADDRESS, Nothing, New List(Of String) From {
-                    personale2.Id
+                    personale2.id
                 }, "multicerta", "sendposta", Nothing)
                 Dim recipient3 As Recipient = Recipient.CreateRecipient("Via Zarotto 63", "43123", "Collecchio", "PR", "it", "pt", "PRIORITARIA1", "person", "Amilcare", "Ponchielli", "AM Spa", Constants.MULTICERTA_ENABLED_ADDRESS, "info@pec.testtest.it", New List(Of String) From {
-                    personale3.Id
+                    personale3.id
                 }, "multicerta", "sendposta", Nothing)
                 Dim postQueueDto As PostQueueDto = PostQueue.CreatePostQueue(Sender.CreateSender(), attachments, New List(Of Recipient) From {
                     recipient1,
@@ -155,11 +158,11 @@ Namespace RestMultidialogoClient
                     globale1
                 })
                 Dim recipient1 As Recipient = Recipient.CreateRecipient("Via Emilia Ovest 129/2", "43126", "Parma", "PR", "it", "pt", "RACCOMANDATA1", "person", "Winton", "Marsalis", "Multidialogo Srl", "esempio1@catchall.netbuilder.it", Nothing, New List(Of String) From {
-                    personale1.Id
+                    personale1.id
                 }, "sendposta", Nothing, Nothing)
                 Dim recipient2 As Recipient = Recipient.CreateRecipient("Via Zarotto 63", "43123", "Collecchio", "PR", "it", "pt", "RACCOMANDATA1AR", "person", "Clara", "Schumann", "ASA Srl", "esempio2@catchall.netbuilder.it", Nothing, New List(Of String) From {
-                    globale1.Id,
-                    personale2.Id
+                    globale1.id,
+                    personale2.id
                 }, "sendposta", Nothing, Nothing)
                 Dim postQueueDto As PostQueueDto = PostQueue.CreatePostQueue(Sender.CreateSender(), attachments, New List(Of Recipient) From {
                     recipient1,
@@ -268,6 +271,74 @@ Namespace RestMultidialogoClient
             Dim userPreferences As UserPreferencesData = JsonConvert.DeserializeObject(Of UserPreferencesData)(responseBody)
             Console.WriteLine("Affrancatura impostata: " & userPreferences.GetSenderPostageType())
         End Function
+
+        Private Shared Async Function Scenario_9() As Task
+            Dim account As String = Utils.GetAccount()
+
+            ' sender
+            Dim sender As SmsSender = SmsSender.CreateWithPhoneNumber(
+                    Constants.SENDER_PHONE_NUMBER_UUID,
+                    Constants.SENDER_NOTIFICATION_ADDRESS
+            )
+
+            ' options
+            Dim options As SmsQueueOptions = SmsQueueOptions.Create(Nothing, "Promemoria #1443")
+
+            ' request
+            Dim request As PostSmsQueueRequest = New PostSmsQueueRequest(
+                    sender,
+                    "Promemoria",
+                    "Ciao {name}",
+                    options)
+
+            ' add global custom data
+            request.customData.Add(New CustomDataElement("my-identifier", "xyz", "hidden"))
+
+            ' recipients
+            request.recipients.Add(
+                    New SmsRecipient(
+                            "+393660000001",
+                            New List(Of Keyword) From {New Keyword("name", "Mario")},
+                            Nothing
+                    )
+            )
+
+            request.recipients.Add(
+                    New SmsRecipient(
+                            "+393660000002",
+                            New List(Of Keyword) From {New Keyword("name", "Maria")},
+                            New List(Of CustomDataElement) From {New CustomDataElement("recipient-id", "100", "hidden")}
+                    )
+            )
+
+            Await SendPostSmsQueueRequest(account, New PostSmsQueueRequestDto(request))
+        End Function
+
+        Private Shared Async Function SendPostSmsQueueRequest(account As String, postQueueDto As PostSmsQueueRequestDto) As Task
+            Dim url = Constants.REST_MULTIDIALOGO_STAGE_HOST + "/users/" + account + "/sms-queues"
+            Dim json = JsonConvert.SerializeObject(postQueueDto)
+
+            Console.Write(json)
+
+
+            Dim response = Await SendRequest(url, json, "Post")
+
+            If (response Is Nothing Or response.Content Is Nothing) Then
+                Throw New ApiDialogException("Impossibile creare la coda")
+            End If
+
+
+            Dim responseBody As String = Await response.Content.ReadAsStringAsync()
+
+            Dim status As String = Utils.GetResponseStatus(responseBody)
+            If (status.Equals("CREATED")) Then
+                Console.WriteLine("Coda creata")
+            Else
+                Console.WriteLine("Si è verificato un errore! Dettagli:")
+                HandleErrors(responseBody, postQueueDto)
+            End If
+        End Function
+
 
         Private Shared Async Function SendPostQueueRequest(ByVal account As String, ByVal postQueueDto As PostQueueDto) As Task
             Dim url As String = Constants.REST_MULTIDIALOGO_STAGE_HOST & "/users/" & account & "/queues"

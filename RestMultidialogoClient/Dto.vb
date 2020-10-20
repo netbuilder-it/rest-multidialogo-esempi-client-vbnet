@@ -481,7 +481,7 @@ Namespace RestMultidialogoClient
             Public countryCode As String
             Public billingMode As String
             Public track As CuTrack
-            Public type as String
+            Public type As String
 
             Public Sub New(ByVal fileContent As String)
                 Me.label = "Esempio"
@@ -507,6 +507,34 @@ Namespace RestMultidialogoClient
             Public Shared Function CreatePostRequestDtoAsJson(ByVal filename As String) As String
                 Return JsonConvert.SerializeObject(CreatePostRequestDto(filename))
             End Function
+        End Class
+
+        Public Class PostSmsQueueRequest
+            Public sender As SmsSender
+            Public type As String = "sms-queue"
+            Public topic As String
+            Public message As String
+            Public options As SmsQueueOptions
+            Public customData As List(Of CustomDataElement) = New List(Of CustomDataElement)
+            Public recipients As List(Of SmsRecipient) = New List(Of SmsRecipient)
+
+            Public Sub New(sender As SmsSender,
+                                   topic As String,
+                                   message As String,
+                                   options As SmsQueueOptions)
+                Me.sender = sender
+                Me.topic = topic
+                Me.message = message
+                Me.options = options
+            End Sub
+        End Class
+
+        Public Class PostSmsQueueRequestDto
+            Public data As DataPayload(Of PostSmsQueueRequest)
+
+            Public Sub New(ByVal postSmsQueueRequest As PostSmsQueueRequest)
+                Me.data = New DataPayload(Of PostSmsQueueRequest)(postSmsQueueRequest)
+            End Sub
         End Class
     End Module
 End Namespace
