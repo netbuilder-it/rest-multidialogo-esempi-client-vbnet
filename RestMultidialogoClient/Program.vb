@@ -318,9 +318,6 @@ Namespace RestMultidialogoClient
             Dim url = Constants.REST_MULTIDIALOGO_STAGE_HOST + "/users/" + account + "/sms-queues"
             Dim json = JsonConvert.SerializeObject(postQueueDto)
 
-            Console.Write(json)
-
-
             Dim response = Await SendRequest(url, json, "Post")
 
             If (response Is Nothing Or response.Content Is Nothing) Then
